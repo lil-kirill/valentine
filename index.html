@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Для Софи 💖</title>
+
+  <style>
+    :root{
+      --bg1:#ffffff;
+      --bg2:#fff5f7;
+      --text:#2b2b2b;
+      --heart:#ff2d55;
+      --btn:#ffffff;
+      --btnBorder: rgba(0,0,0,.12);
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      height:100svh;
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+      background: radial-gradient(circle at top, var(--bg1) 0%, var(--bg2) 60%);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      text-align:center;
+      padding:
+        env(safe-area-inset-top)
+        env(safe-area-inset-right)
+        env(safe-area-inset-bottom)
+        env(safe-area-inset-left);
+    }
+
+    /* экран ДО выбора */
+    .wrap{
+      width:min(560px, 92vw);
+      padding:20px 14px 22px;
+      border-radius:22px;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 18px 60px rgba(0,0,0,.08);
+      position: relative;
+      z-index: 2;
+    }
+
+    h1{
+      margin:6px 0 12px;
+      font-size: clamp(22px, 5.4vw, 40px);
+      font-weight:900;
+      line-height:1.1;
+    }
+
+    /* сердце БЕЗ пульсации */
+    .big-heart{
+      font-size: clamp(120px, 26vw, 260px);
+      color:var(--heart);
+      filter: drop-shadow(0 10px 18px rgba(255,45,85,.25));
+      margin: 6px 0 12px;
+      user-select: none;
+    }
+
+    .buttons{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      flex-wrap: wrap;
+    }
+
+    button{
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      border:1px solid var(--btnBorder);
+      background:var(--btn);
+      padding:14px 22px;
+      border-radius:999px;
+      font-size:18px;
+      font-weight:800;
+      box-shadow: 0 12px 30px rgba(0,0,0,.10);
+      min-width: 140px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 360px){
+      button{ min-width: 160px; width: 80vw; }
+      .buttons{ gap: 10px; }
+    }
+
+    /* ФИНАЛЬНЫЙ экран */
+    .final{
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 3;
+      transition: opacity .35s ease;
+    }
+
+    .final.show{
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* сердце С пульсацией только в финале */
+    .final-heart{
+      font-size: clamp(140px, 34vw, 320px);
+      color: var(--heart);
+      filter: drop-shadow(0 12px 22px rgba(255,45,85,.25));
+      animation: beat 1s infinite;
+      margin-bottom: 6px;
+      user-select: none;
+    }
+
+    @keyframes beat{
+      0%,100%{transform:scale(1)}
+      25%{transform:scale(1.06)}
+      50%{transform:scale(.98)}
+      75%{transform:scale(1.08)}
+    }
+
+    .final-text{
+      font-size: clamp(24px, 6vw, 44px);
+      font-weight: 950;
+      line-height: 1.1;
+    }
+
+    .final-sign{
+      display:block;
+      margin-top:10px;
+      font-size: clamp(16px, 4vw, 24px);
+      font-weight: 850;
+      opacity: .85;
+    }
+
+    /* летающие сердечки */
+    .fly-heart{
+      position: fixed;
+      bottom: -40px;
+      pointer-events: none;
+      z-index: 1;
+      will-change: transform, opacity;
+      filter: drop-shadow(0 8px 12px rgba(255,45,85,.25));
+      opacity: .9;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- экран ДО -->
+  <div class="wrap" id="card">
+    <h1>Софи, будешь моей валентинкой?</h1>
+    <div class="big-heart">❤</div>
+
+    <div class="buttons">
+      <button type="button">Да</button>
+      <button type="button">Да</button>
+    </div>
+  </div>
+
+  <!-- экран ПОСЛЕ -->
+  <div class="final" id="final">
+    <div class="final-heart">❤</div>
+    <div class="final-text">
+      Софочка, я люблю тебя!
+      <span class="final-sign">От Кирилла</span>
+    </div>
+  </div>
+
+  <script>
+    const card = document.getElementById('card');
+    const final = document.getElementById('final');
+    const btns = document.querySelectorAll('button');let chosen = false;
+    const rand = (a,b)=>Math.random()*(b-a)+a;
+
+    function spawnHeart(strong=false){
+      const h=document.createElement('div');
+      h.className='fly-heart';
+      h.textContent='❤';
+      h.style.fontSize=(strong?rand(18,52):rand(12,30))+'px';
+      h.style.left=rand(0,100)+'vw';
+      h.style.color=`hsl(${[350,0,5,340][Math.floor(Math.random()*4)]} 92% 60%)`;
+      document.body.appendChild(h);
+
+      const x=rand(-90,90);
+      const y=strong?rand(700,1200):rand(420,900);
+      const d=strong?rand(1400,2200):rand(5200,9000);
+      const r=rand(-40,40);
+      const s=performance.now();
+
+      (function a(t){
+        const p=Math.min(1,(t-s)/d);
+        const e=1-Math.pow(1-p,3);
+        h.style.transform=`translate(${x*e}px,${-y*e}px) rotate(${r*e}deg)`;
+        h.style.opacity=1-p;
+        p<1?requestAnimationFrame(a):h.remove();
+      })(s);
+    }
+
+    // фоновые сердечки
+    setInterval(()=>spawnHeart(false),320);
+
+    function bigBurst(){
+      for(let i=0;i<70;i++) setTimeout(()=>spawnHeart(true), i*16);
+      for(let i=0;i<30;i++) setTimeout(()=>spawnHeart(true), 1200 + i*22);
+    }
+
+    function choose(){
+      if(chosen) return;
+      chosen = true;
+      card.style.display = 'none';
+      final.classList.add('show');
+      bigBurst();
+    }
+
+    // click + touch (iPhone-safe)
+    btns.forEach(b=>{
+      b.addEventListener('click', choose);
+      b.addEventListener('touchstart', e => {
+        e.preventDefault();
+        choose();
+      }, { passive:false });
+    });
+  </script>
+
+</body>
+</html>
